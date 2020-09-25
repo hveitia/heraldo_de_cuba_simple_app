@@ -7,6 +7,14 @@ void main() {
   runApp(MyApp());
 }
 
+class MyGlobals {
+  GlobalKey _scaffoldKey;
+  MyGlobals() {
+    _scaffoldKey = GlobalKey();
+  }
+  GlobalKey get scaffoldKey => _scaffoldKey;
+}
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -47,6 +55,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     MyCategory(FontAwesomeIcons.moneyCheck, 'donaciones',
         'https://heraldodecuba.com/contribucion-con-el-heraldo-de-cuba/'),
   ];
+  num position = 1;
+  MyGlobals myGlobals = MyGlobals();
 
   @override
   void initState() {
@@ -59,11 +69,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {}
     if (state == AppLifecycleState.resumed) {
-      RestartWidget.restartApp(context);
+      RestartWidget.restartApp(myGlobals.scaffoldKey.currentContext);
     }
   }
 
@@ -79,18 +94,41 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               _getContainerList(),
               Container(
                   height: _screenSize.height * 0.85,
-                  child: WebView(
-                    initialUrl: this.url,
-                    javaScriptMode: JavaScriptMode.unrestricted,
-                    onWebViewCreated: (WebViewController c) {
-                      _controller = c;
-                    },
+                  child: IndexedStack(
+                    index: position,
+                    children: <Widget>[
+                      WebView(
+                        initialUrl: this.url,
+                        javascriptMode: JavascriptMode.unrestricted,
+                        onPageFinished: doneLoading,
+                        onPageStarted: startLoading,
+                        onWebViewCreated: (WebViewController c) {
+                          _controller = c;
+                        },
+                      ),
+                      Container(
+                        color: Colors.white,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
                   )),
             ],
           ),
         ),
       ),
     );
+  }
+
+  doneLoading(String A) {
+    setState(() {
+      position = 0;
+    });
+  }
+
+  startLoading(String A) {
+    setState(() {
+      position = 1;
+    });
   }
 
   _getContainerList() {

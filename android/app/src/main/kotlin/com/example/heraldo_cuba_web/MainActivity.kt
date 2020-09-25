@@ -1,4 +1,4 @@
-package com.example.heraldo_cuba_web
+package com.heraldo.cuba.web
 
 import io.flutter.embedding.android.FlutterActivity
 
